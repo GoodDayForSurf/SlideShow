@@ -17,6 +17,7 @@ body {
     height: 100vh;
     width: 100vw;
     background-color: black;
+    font-family: "Roboto", sans-serif;
 
     --appearance-delay: 0s;
     --showing-time: 0s;
@@ -24,12 +25,14 @@ body {
 
 #canvas {
     display: none;
-    height: 100%;
-    width: 100%;
+    height: 100vh;
+    width: 100vw;
 }
 
 #canvas.enabled {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #choose-files-input {
@@ -80,6 +83,7 @@ body {
 #img-player {
     margin: auto auto;
     height: 100vh;
+    width: 100vw;
 
     background-repeat: no-repeat;
     background-position: center;

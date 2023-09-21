@@ -26,9 +26,7 @@ function onLoadImg() {
     }, delay * 1000);
 }
 
-imgHelper.onload = async function() {
-
-
+imgHelper.onload = function() {
     setTimeout(() => onLoadImg(), 50);
 }
 
@@ -44,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return isFileForShow ? [URL.createObjectURL(f) + (isVideo ? '\u00A0video=true': '')] : [];
         });
 
-        init();
+       init();
     });
 });
 
@@ -115,12 +113,12 @@ async function init(useServer = false) {
     players.video.addEventListener("loadedmetadata", function() {
         const videoWidth = this.videoWidth;
         const videoHeight = this.videoHeight;
-
-        if (videoWidth > videoHeight) {
+        players.video.style.height = "calc(100vh - 5px)";
+        /*if (videoWidth > videoHeight) {
             players.video.style.width = "100%";
         } else {
             players.video.style.height = "100%";
-        }
+        }*/
     });
 
     players.video.addEventListener('ended', function() {
@@ -146,10 +144,6 @@ function changeDelay(diff) {
     changeDelay.timeout = setTimeout(() => {
         infoEl.className = '';
     }, 2000);
-}
-
-function getImageSize() {
-
 }
 
 function addKeyboardControls() {
