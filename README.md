@@ -1,5 +1,5 @@
 # SlideShow
-__Client side__ only web application for showing photos and videos in slide show mode, with keyboard controls.<br>
+__Browser side__ only web application for showing photos and videos in slide show mode, with keyboard controls.<br>
 
 Choose a folder with image files or mp4 videos.<br>
 

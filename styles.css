@@ -1,3 +1,12 @@
+@keyframes appearance {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes hiding {
+    from {opacity: 1;}
+    to {opacity: 0;}
+}
 
 body {
     margin: 0;
@@ -8,13 +17,26 @@ body {
     height: 100vh;
     width: 100vw;
     background-color: black;
+
+    --appearance-delay: 0s;
+    --showing-time: 0s;
+}
+
+#canvas {
+    display: none;
+    height: 100%;
+    width: 100%;
+}
+
+#canvas.enabled {
+    display: block;
 }
 
 #choose-files-input {
     display: none;
 }
 
-#choose-files-button {
+#start-panel button {
     padding: 20px;
     border-radius: 20px;
     font-size: 20px;
@@ -24,7 +46,28 @@ body {
     cursor: pointer;
 }
 
-#choose-files-button:active {
+.appearance {
+    animation: appearance calc(var(--appearance-delay)*2) ease-out;
+    animation-fill-mode: forwards;
+}
+
+.hiding {
+    animation: hiding var(--appearance-delay) ease-in;
+    animation-fill-mode: forwards;
+}
+
+.appearance-and-hiding {
+    animation: appearance calc(var(--appearance-delay)*2) ease-out, hiding var(--appearance-delay) ease-in calc(var(--showing-time) - var(--appearance-delay));
+    animation-fill-mode: forwards;
+}
+
+#start-panel {
+    display: flex;
+    flex-flow: column;
+    gap: 20px;
+}
+
+#start-panel button:active {
     border-color: violet;
     color: violet;
 }
@@ -37,8 +80,11 @@ body {
 #img-player {
     margin: auto auto;
     height: 100vh;
-    opacity: 0;
-    transition: opacity 1s;
+
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+
 }
 
 #pause-icon {

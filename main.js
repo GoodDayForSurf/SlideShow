@@ -1,10 +1,13 @@
 
 const serverUrl = 'http://localhost:9999/';
-let delay = 12;
+let delay = 5;
+const appearanceDelay = 1;
 const players = {
     image: null,
     video: null,
 };
+const imgHelper = new Image();
+
 let FOTOS = [];
 
 let currentIndex = 0;
@@ -12,19 +15,28 @@ let isCurrentShowImage = true;
 let nextDelayTimeout;
 let isPaused = false;
 
-const bodyHtml = `
-                           <img id="img-player" src="">
-                            <video id="video-player" controls autoplay width="100%">
-                                <source id="video-source" src="" type="video/mp4">
-                                Ваш браузер не поддерживает видео.
-                            </video>
-                            <div id="pause-icon">⏸</div>
-                            <div id="info-container"></div>
-`;
+function onLoadImg() {
+    players.image.className = isPaused ? 'appearance' : 'appearance-and-hiding';
+    players.image.style.backgroundImage = `url(${imgHelper.src})`;
+
+    if( isPaused ) { return; }
+
+    nextDelayTimeout = setTimeout(() => {
+        showNext();
+    }, delay * 1000);
+}
+
+imgHelper.onload = async function() {
+
+
+    setTimeout(() => onLoadImg(), 50);
+}
 
 document.addEventListener("DOMContentLoaded", function() {
     document.querySelector("#choose-files-input").addEventListener("change", function() {
         const files = this.files;
+
+        document.body.style.setProperty('--appearance-delay', appearanceDelay + 's' );
 
         FOTOS = [...files].flatMap(f => {
             const isVideo = f.type.startsWith("video/mp4");
@@ -49,28 +61,22 @@ function enablePlayer(player) {
     players.video.className = isCurrentShowImage ? 'disabled' : '';
 }
 
-function showNext(ignorePause = false) {
+
+function showNext() {
     let [src, isVideo] = FOTOS[currentIndex].split('\u00A0');
+
     isVideo = isVideo || /mp4$/i.test(src);
 
-    if ( isPaused && !ignorePause ) {
-        return setTimeout(() => {
-            showNext();
-        }, 100);
-    }
-
-    if ( isVideo ) {
+   if ( isVideo ) {
         enablePlayer(players.video);
         players.video.src = src;
         players.video.load();
         players.video.focus();
     } else {
-        enablePlayer(players.image);
-        players.image.src = src;
-
-        setTimeout(() => {
-            players.image.className = 'visible';
-        }, 50);
+       enablePlayer(players.image)
+       players.image.style.backgroundImage = 'none';
+       players.image.className = '';
+       imgHelper.src = src;
     }
 
     currentIndex += 1;
@@ -84,30 +90,27 @@ async function initFromServer() {
     const html =  await fetch(serverUrl);
     const text = await html.text();
 
-    document.body.innerHTML = text;
+    const tmpEl = document.createElement('div');
+    document.body.appendChild(tmpEl);
+    tmpEl.innerHTML = text;
 
     FOTOS = [...document.querySelectorAll('a')].flatMap( (el) => {
         const href =  el.getAttribute('href');
 
         return /\.[\d\w]{2,4}$/i.test(href) ? [serverUrl + href] : [];
     });
+
+    tmpEl.remove();
 }
 
 async function init(useServer = false) {
     await (useServer ? initFromServer() : null);
 
-    document.body.innerHTML = bodyHtml;
+    document.querySelector('#start-panel').style.display = 'none';
+    document.querySelector('#canvas').className = 'enabled';
 
     players.video = document.querySelector('#video-player');
     players.image = document.querySelector('#img-player');
-
-    players.image.addEventListener('load', function() {
-        if( isPaused ) { return; }
-
-        nextDelayTimeout = setTimeout(() => {
-            showNext();
-        }, delay * 1000)
-    });
 
     players.video.addEventListener("loadedmetadata", function() {
         const videoWidth = this.videoWidth;
@@ -131,8 +134,10 @@ async function init(useServer = false) {
 }
 
 function changeDelay(diff) {
-    delay += delay == 1 && diff < 1 ? 0 : diff;
+    delay += (delay + diff <= appearanceDelay * 2 ? 0 : diff);
     const infoEl = document.querySelector('#info-container');
+
+    document.body.style.setProperty('--showing-time', delay + 's' );
 
     infoEl.innerHTML = `Delay is ${delay} s`;
     infoEl.className = 'active';
@@ -143,6 +148,10 @@ function changeDelay(diff) {
     }, 2000);
 }
 
+function getImageSize() {
+
+}
+
 function addKeyboardControls() {
     document.body.addEventListener("keydown", function(event) {
 
@@ -150,11 +159,11 @@ function addKeyboardControls() {
             case "ArrowLeft":
                 clearTimeout(nextDelayTimeout);
                 currentIndex = currentIndex > 1 ? currentIndex - 2 : 0;
-                showNext(true);
+                showNext();
                 break;
             case "ArrowRight":
                 clearTimeout(nextDelayTimeout);
-                showNext(true);
+                showNext();
                 break;
             case "NumpadSubtract":
             case "Minus":
@@ -166,7 +175,22 @@ function addKeyboardControls() {
                 break;
             case "Space":
                 isPaused = !isPaused;
+                clearTimeout(nextDelayTimeout);
+
                 document.querySelector('#pause-icon').style.display = isPaused ? 'block' : 'none';
+
+                players.image.className = '';
+
+                if(!isPaused) {
+                    players.image.className = 'hiding';
+
+                    setTimeout(() => {
+                        players.image.style.backgroundImage = 'none';
+                        players.image.className = '';
+                        showNext();
+                    }, appearanceDelay * 1000)
+                }
+
                 event.preventDefault();
                 break;
         }

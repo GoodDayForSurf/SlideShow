@@ -5,7 +5,19 @@
     <script src="main.js"></script>
 </head>
 <body>
-<button onclick="document.querySelector('#choose-files-input').click()" id="choose-files-button">CHOOSE FOLDER FOR SHOW</button>
-<input type="file" id="choose-files-input" webkitdirectory directory multiple />
+<div id="start-panel">
+    <button onclick="document.querySelector('#choose-files-input').click()"  id="choose-files-button">CHOOSE FOLDER FOR SHOW</button>
+    <input type="file" id="choose-files-input" webkitdirectory directory multiple />
+</div>
+
+<div id="canvas">
+    <div id="img-player"></div>
+    <video id="video-player" controls autoplay width="100%">
+        <source id="video-source" src="" type="video/mp4">
+        Ваш браузер не поддерживает видео.
+    </video>
+    <div id="pause-icon">⏸</div>
+    <div id="info-container"></div>
+</div>
 </body>
 </html>
