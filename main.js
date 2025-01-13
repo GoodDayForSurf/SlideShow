@@ -1,4 +1,3 @@
-
 const serverUrl = 'http://localhost:9999/';
 let delay = 5;
 const appearanceDelay = 1;
@@ -7,19 +6,37 @@ const players = {
     video: null,
 };
 const imgHelper = new Image();
+const STORAGE_KEY = 'slideshow-last-position';
 
 let FOTOS = [];
-
+let currentFolder = '';
 let currentIndex = 0;
 let isCurrentShowImage = true;
 let nextDelayTimeout;
 let isPaused = false;
 
+function saveLastPosition() {
+    const currentFile = FOTOS[currentIndex - 1] || FOTOS[0];
+    if (currentFile) {
+        const lastPosition = {
+            folder: currentFolder,
+            file: currentFile,
+            index: currentIndex - 1 >= 0 ? currentIndex - 1 : 0
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(lastPosition));
+    }
+}
+
+function getLastPosition() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : null;
+}
+
 function onLoadImg() {
     players.image.className = isPaused ? 'appearance' : 'appearance-and-hiding';
     players.image.style.backgroundImage = `url(${imgHelper.src})`;
 
-    if( isPaused ) { return; }
+    if (isPaused) { return; }
 
     nextDelayTimeout = setTimeout(() => {
         showNext();
@@ -31,20 +48,49 @@ imgHelper.onload = function() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+    const lastPosition = getLastPosition();
+    const startPanel = document.querySelector('#start-panel');
+
+    // Add Continue button if we have a saved position
+    if (lastPosition) {
+        const continueBtn = document.createElement('button');
+        continueBtn.textContent = 'Продолжить';
+        continueBtn.onclick = async () => {
+            const dirHandle = await window.showDirectoryPicker();
+            const files = [];
+
+            for await (const entry of dirHandle.values()) {
+                if (entry.kind === 'file') {
+                    files.push(await entry.getFile());
+                }
+            }
+
+            currentFolder = dirHandle.name;
+            handleFiles(files, lastPosition.index);
+        };
+
+        startPanel.appendChild(continueBtn);
+    }
+
     document.querySelector("#choose-files-input").addEventListener("change", function() {
         const files = this.files;
-
-        document.body.style.setProperty('--appearance-delay', appearanceDelay + 's' );
-
-        FOTOS = [...files].flatMap(f => {
-            const isVideo = f.type.startsWith("video/mp4");
-            const isFileForShow = isVideo || f.type.startsWith("image/");
-            return isFileForShow ? [URL.createObjectURL(f) + (isVideo ? '\u00A0video=true': '')] : [];
-        });
-
-       init();
+        currentFolder = files[0].webkitRelativePath.split('/')[0];
+        handleFiles([...files]);
     });
 });
+
+function handleFiles(files, startIndex = 0) {
+    document.body.style.setProperty('--appearance-delay', appearanceDelay + 's');
+
+    FOTOS = files.flatMap(f => {
+        const isVideo = f.type.startsWith("video/mp4");
+        const isFileForShow = isVideo || f.type.startsWith("image/");
+        return isFileForShow ? [URL.createObjectURL(f) + (isVideo ? '\u00A0video=true' : '')] : [];
+    });
+
+    currentIndex = startIndex;
+    init();
+}
 
 function enablePlayer(player) {
     isCurrentShowImage = player !== players.video;
@@ -61,20 +107,21 @@ function enablePlayer(player) {
 
 
 function showNext() {
-    let [src, isVideo] = FOTOS[currentIndex].split('\u00A0');
+    saveLastPosition();
 
+    let [src, isVideo] = FOTOS[currentIndex].split('\u00A0');
     isVideo = isVideo || /mp4$/i.test(src);
 
-   if ( isVideo ) {
+    if (isVideo) {
         enablePlayer(players.video);
         players.video.src = src;
         players.video.load();
         players.video.focus();
     } else {
-       enablePlayer(players.image)
-       players.image.style.backgroundImage = 'none';
-       players.image.className = '';
-       imgHelper.src = src;
+        enablePlayer(players.image)
+        players.image.style.backgroundImage = 'none';
+        players.image.className = '';
+        imgHelper.src = src;
     }
 
     currentIndex += 1;
@@ -85,15 +132,15 @@ function showNext() {
 }
 
 async function initFromServer() {
-    const html =  await fetch(serverUrl);
+    const html = await fetch(serverUrl);
     const text = await html.text();
 
     const tmpEl = document.createElement('div');
     document.body.appendChild(tmpEl);
     tmpEl.innerHTML = text;
 
-    FOTOS = [...document.querySelectorAll('a')].flatMap( (el) => {
-        const href =  el.getAttribute('href');
+    FOTOS = [...document.querySelectorAll('a')].flatMap((el) => {
+        const href = el.getAttribute('href');
 
         return /\.[\d\w]{2,4}$/i.test(href) ? [serverUrl + href] : [];
     });
@@ -114,11 +161,6 @@ async function init(useServer = false) {
         const videoWidth = this.videoWidth;
         const videoHeight = this.videoHeight;
         players.video.style.height = "calc(100vh - 5px)";
-        /*if (videoWidth > videoHeight) {
-            players.video.style.width = "100%";
-        } else {
-            players.video.style.height = "100%";
-        }*/
     });
 
     players.video.addEventListener('ended', function() {
