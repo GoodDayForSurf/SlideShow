@@ -54,7 +54,8 @@ document.addEventListener("DOMContentLoaded", function() {
     // Add Continue button if we have a saved position
     if (lastPosition) {
         const continueBtn = document.createElement('button');
-        continueBtn.textContent = 'Продолжить';
+        continueBtn.textContent = 'CONTINUE FROM LAST VIEW';
+
         continueBtn.onclick = async () => {
             const dirHandle = await window.showDirectoryPicker();
             const files = [];
