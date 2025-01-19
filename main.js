@@ -194,6 +194,7 @@ function changeDelay(diff) {
 
 function addKeyboardControls() {
     document.body.addEventListener("keydown", function(event) {
+        console.log('----using CTRL------>', event.ctrlKey);
 
         switch (event.code) {
             case "ArrowLeft":
@@ -203,7 +204,6 @@ function addKeyboardControls() {
                 showNext();
                 break;
             case "ArrowRight":
-                console.log('----using CRTL------>', event.ctrlKey);
                 currentIndex = currentIndex + (event.ctrlKey ? 10 : 0);
                 clearTimeout(nextDelayTimeout);
                 showNext();
