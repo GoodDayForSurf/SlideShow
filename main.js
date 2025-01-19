@@ -23,6 +23,7 @@ function saveLastPosition() {
             file: currentFile,
             index: currentIndex - 1 >= 0 ? currentIndex - 1 : 0
         };
+        console.log('----Save last position------>', lastPosition);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(lastPosition));
     }
 }
@@ -107,7 +108,9 @@ function enablePlayer(player) {
 }
 
 
-function showNext() {
+function showNext(count = 0) {
+    currentIndex = currentIndex + count;
+
     saveLastPosition();
 
     let [src, isVideo] = FOTOS[currentIndex].split('\u00A0');
@@ -196,11 +199,11 @@ function addKeyboardControls() {
             case "ArrowLeft":
                 clearTimeout(nextDelayTimeout);
                 currentIndex = currentIndex > 1 ? currentIndex - 2 : 0;
-                showNext();
+                showNext(event.ctrlKey ? -10 : 0);
                 break;
             case "ArrowRight":
                 clearTimeout(nextDelayTimeout);
-                showNext();
+                showNext(event.ctrlKey ? 10 : 0);
                 break;
             case "NumpadSubtract":
             case "Minus":
