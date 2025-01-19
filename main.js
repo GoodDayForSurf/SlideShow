@@ -197,14 +197,14 @@ function addKeyboardControls() {
 
         switch (event.code) {
             case "ArrowLeft":
-                currentIndex = event.ctrlKey ? currentIndex - 11 : currentIndex;
+                currentIndex = currentIndex - (event.ctrlKey ? 11 : 2);
                 clearTimeout(nextDelayTimeout);
                 currentIndex = currentIndex > 1 ? currentIndex : 0;
                 showNext();
                 break;
             case "ArrowRight":
                 console.log('----using CRTL------>', event.ctrlKey);
-                currentIndex = event.ctrlKey ? currentIndex + 10 : currentIndex;
+                currentIndex = currentIndex + (event.ctrlKey ? 10 : 0);
                 clearTimeout(nextDelayTimeout);
                 showNext();
                 break;
