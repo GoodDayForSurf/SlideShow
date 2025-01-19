@@ -195,7 +195,7 @@ function addKeyboardControls() {
 
         switch (event.code) {
             case "ArrowLeft":
-                currentIndex = event.ctrlKey ? currentIndex - 11 : -2;
+                currentIndex = event.ctrlKey ? currentIndex - 11 : currentIndex;
                 clearTimeout(nextDelayTimeout);
                 currentIndex = currentIndex > 1 ? currentIndex : 0;
                 showNext();
