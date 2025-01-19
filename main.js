@@ -15,23 +15,28 @@ let isCurrentShowImage = true;
 let nextDelayTimeout;
 let isPaused = false;
 
-function saveLastPosition() {
+function saveState() {
     const currentFile = FOTOS[currentIndex - 1] || FOTOS[0];
+
     if (currentFile) {
-        const lastPosition = {
-            folder: currentFolder,
+        let savedData = getSavedState() || {};
+
+        savedData.currentFolder = savedData.currentFolder || {};
+
+        savedData.currentFolder = {
             file: currentFile,
             index: currentIndex - 1 >= 0 ? currentIndex - 1 : 0
-        };
-        console.log('----Save last position------>', lastPosition);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(lastPosition));
+        }
+
+        console.log('----Save last position------>', savedData);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedData));
     }
 }
 
-function getLastPosition() {
+function getSavedState() {
     const saved = localStorage.getItem(STORAGE_KEY);
     const savedData = saved ? JSON.parse(saved) : null;
-    console.log('------getLastPosition---->', savedData);
+    console.log('------getSavedState---->', savedData);
     return savedData;
 }
 
@@ -51,11 +56,11 @@ imgHelper.onload = function() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    const lastPosition = getLastPosition();
+    const savedData = getSavedState();
     const startPanel = document.querySelector('#start-panel');
 
     // Add Continue button if we have a saved position
-    if (lastPosition) {
+    if (savedData) {
         const continueBtn = document.createElement('button');
         continueBtn.textContent = 'CONTINUE FROM LAST VIEW';
 
@@ -70,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             currentFolder = dirHandle.name;
-            handleFiles(files, lastPosition.index);
+            handleFiles(files, savedData.currentFolder?.index || 0);
         };
 
         startPanel.appendChild(continueBtn);
@@ -111,7 +116,7 @@ function enablePlayer(player) {
 
 
 function showNext() {
-    saveLastPosition();
+    saveState();
 
     let [src, isVideo] = FOTOS[currentIndex].split('\u00A0');
     isVideo = isVideo || /mp4$/i.test(src);
