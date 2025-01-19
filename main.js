@@ -30,7 +30,9 @@ function saveLastPosition() {
 
 function getLastPosition() {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : null;
+    const savedData = saved ? JSON.parse(saved) : null;
+    console.log('------getLastPosition---->', savedData);
+    return savedData;
 }
 
 function onLoadImg() {
