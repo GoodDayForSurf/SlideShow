@@ -21,9 +21,9 @@ function saveState() {
     if (currentFile) {
         let savedData = getSavedState() || {};
 
-        savedData.currentFolder = savedData.currentFolder || {};
+        savedData[currentFolder] = savedData[currentFolder] || {};
 
-        savedData.currentFolder = {
+        savedData[currentFolder] = {
             file: currentFile,
             index: currentIndex - 1 >= 0 ? currentIndex - 1 : 0
         }
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             currentFolder = dirHandle.name;
-            handleFiles(files, savedData.currentFolder?.index || 0);
+            handleFiles(files, savedData[currentFolder]?.index || 0);
         };
 
         startPanel.appendChild(continueBtn);
