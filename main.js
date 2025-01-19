@@ -108,9 +108,7 @@ function enablePlayer(player) {
 }
 
 
-function showNext(count = 0) {
-    currentIndex = currentIndex + count;
-
+function showNext() {
     saveLastPosition();
 
     let [src, isVideo] = FOTOS[currentIndex].split('\u00A0');
@@ -197,13 +195,16 @@ function addKeyboardControls() {
 
         switch (event.code) {
             case "ArrowLeft":
+                currentIndex = event.ctrlKey ? currentIndex - 11 : -2;
                 clearTimeout(nextDelayTimeout);
-                currentIndex = currentIndex > 1 ? currentIndex - 2 : 0;
-                showNext(event.ctrlKey ? -10 : 0);
+                currentIndex = currentIndex > 1 ? currentIndex : 0;
+                showNext();
                 break;
             case "ArrowRight":
+                console.log('----using CRTL------>', event.ctrlKey);
+                currentIndex = event.ctrlKey ? currentIndex + 10 : currentIndex;
                 clearTimeout(nextDelayTimeout);
-                showNext(event.ctrlKey ? 10 : 0);
+                showNext();
                 break;
             case "NumpadSubtract":
             case "Minus":
